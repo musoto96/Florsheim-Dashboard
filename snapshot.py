@@ -11,28 +11,28 @@ import base64
 
 locale.setlocale(locale.LC_ALL, '')
 navbar = importlib.import_module(name='navbar').Navbar()
-analisis = importlib.import_module(name='analisis_snapshot')
+st = importlib.import_module(name='snapshot_tools')  # snapshot tools
 
 año1 = '2020'
 año0 = '2019'
 
 
-def makekpi(x1, x0, y1, y0, pct, top3, status, icon):
+def makekpi(name, id, x1, x0, y1, y0, pct, top3, status, icon):
    kpi = dbc.Card(
          children=[ 
             dbc.CardHeader(
                dbc.Row([ 
-                  dbc.Col('Ventas Netas', style={'fontSize': 12, 'padding': '5px', 'text-align': 'center', 'fontWeight': 'bold'}), 
+                  dbc.Col(name, style={'fontSize': 12, 'padding': '5px', 'text-align': 'center', 'fontWeight': 'bold'}), 
                   ]), style={'padding': '0px'}
                ), 
             dbc.CardBody(
                children=[
                   dbc.Row(children=[ 
-                     dbc.Col(html.Img(src=f'assets/icons/{icon}', height='80%', id='ind', style={'opacity': 0.5}), style={'padding': '0px', 'text-align': 'right'}), 
+                     dbc.Col(html.Img(src=f'assets/icons/{icon}', height='80%', id=f'{id}-ind', style={'opacity': 0.5}), style={'padding': '0px', 'text-align': 'right'}), 
                      dbc.Tooltip(
                         children=[
                            html.P(f'Cambio: {pct:.2f}%', style={'margin': '0px', 'fontSize': 9})
-                           ], target='ind', placement='left'
+                           ], target=f'{id}-ind', placement='left'
                         ), 
                      dbc.Col(html.H5(y1, className='card-title', style={'margin': '0px', 'text-align': 'left', 'color': status})), 
                      dbc.Col(
@@ -52,42 +52,42 @@ def makekpi(x1, x0, y1, y0, pct, top3, status, icon):
                   dbc.Col(children=[
                      dbc.Row(
                         children=[
-                           dbc.Col(f'{top3[2][0]["ESTILO"]}', id='t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                           dbc.Col(f'{top3[2][0]["ESTILO"]}', id=f'{id}-t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                            dbc.Tooltip(
                               children=[
                                  html.P(f'Marca: {top3[2][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Color: {top3[2][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Acabado: {top3[2][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Concepto: {top3[2][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                 ], target='t1', placement='bottom'
+                                 ], target=f'{id}-t1', placement='bottom'
                               ), 
                            dbc.Col(f'{top3[2][1]}%', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                            ]
                         ), 
                      dbc.Row(
                         children=[
-                           dbc.Col(f'{top3[1][0]["ESTILO"]}', id='t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                           dbc.Col(f'{top3[1][0]["ESTILO"]}', id=f'{id}-t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                            dbc.Tooltip(
                               children=[
                                  html.P(f'Marca: {top3[1][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Color: {top3[1][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Acabado: {top3[1][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Concepto: {top3[1][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                 ], target='t2', placement='bottom'
+                                 ], target=f'{id}-t2', placement='bottom'
                               ), 
                            dbc.Col(f'{top3[1][1]}%', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                            ]
                         ), 
                      dbc.Row(
                         children=[
-                           dbc.Col(f'{top3[0][0]["ESTILO"]}', id='t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                           dbc.Col(f'{top3[0][0]["ESTILO"]}', id=f'{id}-t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                            dbc.Tooltip(
                               children=[
                                  html.P(f'Marca: {top3[0][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Color: {top3[0][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Acabado: {top3[0][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Concepto: {top3[0][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                 ], target='t3', placement='bottom'
+                                 ], target=f'{id}-t3', placement='bottom'
                               ), 
                            dbc.Col(f'{top3[0][1]}%', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                            ]
@@ -105,61 +105,61 @@ def makekpi(x1, x0, y1, y0, pct, top3, status, icon):
 
 
 # Ventas netas
-t3vn = analisis.top3_ventas_netas_total(h=1)
+t3vn = st.top3_kpi_by_sheet_precalculated(col='% VENTAS', x=1)
 
-ventas_netas_1 = analisis.ventas_netas_total(h=1)
-ventas_netas_0 = analisis.ventas_netas_total(h=0)
+ventas_netas_1 = st.kpi_by_sheet(col='VENTAS NETAS', x=1)
+ventas_netas_0 = st.kpi_by_sheet(col='VENTAS NETAS', x=0)
 ventas_netas_pct = (float(ventas_netas_1.replace(",", '')) - float(ventas_netas_0.replace(",", "")))*100 / float(ventas_netas_0.replace(",", ""))
 ventas_netas_status = 'lightseagreen' if ventas_netas_pct > 0 else 'grey' if ventas_netas_pct == 0 else 'lightcoral'
 ventas_netas_icon = 'increase-24.png' if ventas_netas_pct >= 0 else 'decrease-24.png'
 
-card_ventas_netas = makekpi(año1, año0, ventas_netas_1, ventas_netas_0, ventas_netas_pct, t3vn, ventas_netas_status, ventas_netas_icon)
+card_ventas_netas = makekpi('Ventas Netas', 't1', año1, año0, ventas_netas_1, ventas_netas_0, ventas_netas_pct, t3vn, ventas_netas_status, ventas_netas_icon)
 
 
 # Utilidades 
-t3u = analisis.top3_utilidad_bruta_total(h=1)
+t3u = st.top3_kpi_by_sheet_precalculated(col='% UTILIDAD GLOBAL', x=1)
 
-utilidad_1 = analisis.utilidad_bruta_total(h=1)
-utilidad_0 = analisis.utilidad_bruta_total(h=0)
+utilidad_1 = st.kpi_by_sheet(col='UTILIDAD BRUTA', x=1)
+utilidad_0 = st.kpi_by_sheet(col='UTILIDAD BRUTA', x=0)
 utilidad_pct = (float(utilidad_1.replace(",", '')) - float(utilidad_0.replace(",", "")))*100 / float(utilidad_0.replace(",", ""))
 utilidad_status = 'lightseagreen' if utilidad_pct > 0 else 'grey' if utilidad_pct == 0 else 'lightcoral'
 utilidad_icon = 'increase-24.png' if utilidad_pct >= 0 else 'decrease-24.png'
 
-card_utilidad = makekpi(año1, año0, utilidad_1, utilidad_0, utilidad_pct, t3vn, utilidad_status, utilidad_icon)
+card_utilidad = makekpi('Utilidades', 't2', año1, año0, utilidad_1, utilidad_0, utilidad_pct, t3u, utilidad_status, utilidad_icon)
 
 
 # Devoluciones
-t3dev = analisis.top3_devoluciones_total(año1, 'Y')
+t3dev = st.top3_kpi_by_period_manual_calc(st.devoluciones, 'ARTS.', año1, 'Y')
 
-devoluciones_1 = analisis.devoluciones_total(año1, 'Y')
-devoluciones_0 = analisis.devoluciones_total(año0, 'Y')
+devoluciones_1 = st.kpi_by_period(st.devoluciones, 'ARTS.', año1, 'Y')
+devoluciones_0 = st.kpi_by_period(st.devoluciones, 'ARTS.', año0, 'Y')
 devoluciones_pct = (float(devoluciones_1.replace(",", '')) - float(devoluciones_0.replace(",", "")))*100 / float(devoluciones_0.replace(",", ""))
 devoluciones_status = 'lightseagreen' if devoluciones_pct < 0 else 'grey' if devoluciones_pct == 0 else 'lightcoral'
 devoluciones_icon = 'increase-24.png' if devoluciones_pct >= 0 else 'decrease-24.png'
 
-card_devoluciones = makekpi(año1, año0, devoluciones_1, devoluciones_0, devoluciones_pct, t3vn, devoluciones_status, devoluciones_icon)
+card_devoluciones = makekpi('Devoluciones', 't3',  año1, año0, devoluciones_1, devoluciones_0, devoluciones_pct, t3dev, devoluciones_status, devoluciones_icon)
 
 
 # Negados
-t3neg = analisis.top3_negados_total(año1, 'Y')
+t3neg = st.top3_kpi_by_period_manual_calc(st.negados, 'ARTS', año1, 'Y')
 
-negados_1 = analisis.negados_total(año1, 'Y')
-negados_0 = analisis.negados_total(año0, 'Y')
+negados_1 = st.kpi_by_period(st.negados, 'ARTS', año1, 'Y')
+negados_0 = st.kpi_by_period(st.negados, 'ARTS', año0, 'Y')
 negados_pct = (float(negados_1.replace(",", '')) - float(negados_0.replace(",", "")))*100 / float(negados_0.replace(",", ""))
 negados_status = 'lightseagreen' if negados_pct < 0 else 'grey' if negados_pct == 0 else 'lightcoral'
 negados_icon = 'increase-24.png' if negados_pct >= 0 else 'decrease-24.png'
 
-card_negados = makekpi(año1, año0, negados_1, negados_0, negados_pct, t3vn, negados_status, negados_icon)
+card_negados = makekpi('Negados', 't4', año1, año0, negados_1, negados_0, negados_pct, t3neg, negados_status, negados_icon)
 
 
 # KPIs secundarios
 
-def makekpi_sec(n, top3):
+def makekpi_sec(name, id, n, top3):
    kpi = dbc.Card(
          children=[ 
             dbc.CardHeader(
                dbc.Row([ 
-                  dbc.Col('Menores Días de Existencia', style={'fontSize': 10, 'padding': '2px', 'text-align': 'center', 'fontWeight': 'bold'}), 
+                  dbc.Col(name, style={'fontSize': 10, 'padding': '2px', 'text-align': 'center', 'fontWeight': 'bold'}), 
                   ]), style={'padding': '0px'}
                ), 
             dbc.CardBody(
@@ -181,42 +181,42 @@ def makekpi_sec(n, top3):
                      dbc.Col(children=[
                         dbc.Row(
                            children=[
-                              dbc.Col(f'{top3[2][0]["ESTILO"]}', id='t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                              dbc.Col(f'{top3[2][0]["ESTILO"]}', id=f'{id}-t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                               dbc.Tooltip(
                                  children=[
                                     html.P(f'Marca: {top3[2][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Color: {top3[2][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Acabado: {top3[2][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Concepto: {top3[2][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                    ], target='t1', placement='bottom'
+                                    ], target=f'{id}-t1', placement='bottom'
                                  ), 
                               dbc.Col(f'{top3[2][1]}', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                               ]
                            ), 
                         dbc.Row(
                            children=[
-                              dbc.Col(f'{top3[1][0]["ESTILO"]}', id='t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                              dbc.Col(f'{top3[1][0]["ESTILO"]}', id=f'{id}-t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                               dbc.Tooltip(
                                  children=[
                                     html.P(f'Marca: {top3[1][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Color: {top3[1][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Acabado: {top3[1][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Concepto: {top3[1][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                    ], target='t2', placement='bottom'
+                                    ], target=f'{id}-t2', placement='bottom'
                                  ), 
                               dbc.Col(f'{top3[1][1]}', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                               ]
                            ), 
                         dbc.Row(
                            children=[
-                              dbc.Col(f'{top3[0][0]["ESTILO"]}', id='t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                              dbc.Col(f'{top3[0][0]["ESTILO"]}', id=f'{id}-t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                               dbc.Tooltip(
                                  children=[
                                     html.P(f'Marca: {top3[0][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Color: {top3[0][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Acabado: {top3[0][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Concepto: {top3[0][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                    ], target='t3', placement='bottom'
+                                    ], target=f'{id}-t3', placement='bottom'
                                  ), 
                               dbc.Col(f'{top3[0][1]}', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                               ]
@@ -235,16 +235,16 @@ def makekpi_sec(n, top3):
 
 
 # Días de existencia
-t3dex = analisis.top3_dexistencia_total()
-dexistencia_1 = analisis.dexistencia_total()
+t3dex = st.top3_dexistencia_total()
+dexistencia_1 = st.dexistencia_total()
 
-card_dexistencia = makekpi_sec(dexistencia_1, t3dex)
+card_dexistencia = makekpi_sec('Menores Días de Existencia', 'dext', dexistencia_1, t3dex)
 
 # Desplazamiento
-t3des = analisis.top3_desplazamiento_total()
-desplazamiento_1 = analisis.desplazamiento_total()
+t3des = st.top3_desplazamiento_total()
+desplazamiento_1 = st.desplazamiento_total()
 
-card_desplazamiento = makekpi_sec(desplazamiento_1, t3des)
+card_desplazamiento = makekpi_sec('Mayor % Desplazamiento', 'desp', desplazamiento_1, t3des)
 
 
 
@@ -326,7 +326,7 @@ card_ts_tabla = dbc.Card(
       )
 
 # EBIT (UAFI: Utilidad antes de financiamiento e impuestos)
-costo_1 = analisis.costo_total(h=1)
+costo_1 = st.kpi_by_sheet(col='COSTO', x=1)
 costo_2 = '0'
 costo_3 = '0'
 costo_4 = '0'

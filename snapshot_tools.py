@@ -8,79 +8,44 @@ import plotly.graph_objects as go
 from pmdarima.arima import auto_arima
 
 
+# KPI's  comparativo i.e. 2000+n+1 vs 2000+n
+
 # Hoja de trabajo: Utilidades por artículo
 ut1 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2020.TXT', sep='\t', encoding='latin_1')
 ut0 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2019.TXT', sep='\t', encoding='latin_1')
 
-# Utilidades
-def utilidad_bruta_total(h):
-   if int(h) == 1:
-      ut = ut1.copy()
-   elif int(h) == 0:
-      ut = ut0.copy()
+def kpi_by_sheet(col, x, prec=0, pct=False):
+   if int(x) == 1:
+      sheet = ut1.copy()
+   elif int(x) == 0:
+      sheet = ut0.copy()
 
-   utilidad_bruta = ut.loc[:, 'UTILIDAD BRUTA'].apply(lambda x: float(x.replace(',', '')))
-   # ajuste presentacion div/2
-   utilidad_bruta_total = f'{utilidad_bruta.sum()/2:,.0f}'
-   return utilidad_bruta_total
+   kpi = sheet.loc[:, col].apply(lambda x: float(x.replace(',', '')))
 
+   if pct == True:
+      kpi = f'{kpi.sum():,.0f}%'  # Porcentaje falta de implementar presición
+   else:
+      kpi = f'{kpi.sum():,.0f}'
 
-def top3_utilidad_bruta_total(h):
-   if int(h) == 1:
-      ut = ut1.copy()
-   elif int(h) == 0:
-      ut = ut0.copy()
-
-   ut.loc[:, '% UTILIDAD GLOBAL'] = ut['% UTILIDAD GLOBAL'].apply(lambda x: float(x.strip('%')))
-   ut = ut.sort_values(by='% UTILIDAD GLOBAL')
-   ut.reset_index(inplace=True, drop=True)
-   ut = ut.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', '% UTILIDAD GLOBAL']].tail(3).reset_index(drop=True)
-   t3 = []
-   for row in ut.iterrows():
-      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , row[1]['% UTILIDAD GLOBAL']))
-   return t3
+   return kpi
 
 
-# Ventas netas
-def ventas_netas_total(h):
-   if int(h) == 1:
-      ut = ut1.copy()
-   elif int(h) == 0:
-      ut = ut0.copy()
+def top3_kpi_by_sheet_precalculated(col, x):
+   if int(x) == 1:
+      sheet = ut1.copy()
+   elif int(x) == 0:
+      sheet = ut0.copy()
 
-   ventas_netas = ut.loc[:, 'VENTAS NETAS'].apply(lambda x: float(x.replace(',', '')))
-   # ajuste presentacion div/2
-   ventas_netas_total = f'{ventas_netas.sum()/2:,.0f}'
-   return ventas_netas_total
+   sheet.loc[:, col] = sheet[col].apply(lambda x: float(x.strip('%')))
+   sheet = sheet.sort_values(by=col)
+   sheet.reset_index(inplace=True, drop=True)
+   sheet = sheet.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', col]].tail(3).reset_index(drop=True)
 
+   kpi_top3 = []
+   for row in sheet.iterrows():
+      kpi_top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , row[1][col]))
 
-def top3_ventas_netas_total(h):
-   if int(h) == 1:
-      ut = ut1.copy()
-   elif int(h) == 0:
-      ut = ut0.copy()
-
-   ut.loc[:, '% VENTAS'] = ut['% VENTAS'].apply(lambda x: float(x.strip('%')))
-   ut = ut.sort_values(by='% VENTAS')
-   ut.reset_index(inplace=True, drop=True)
-   ut = ut.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', '% VENTAS']].tail(3).reset_index(drop=True)
-   t3 = []
-   for row in ut.iterrows():
-      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , row[1]['% VENTAS']))
-   return t3
-
-
-# Costo
-def costo_total(h):
-   if int(h) == 1:
-      ut = ut1.copy()
-   elif int(h) == 0:
-      ut = ut0.copy()
-
-   costo = ut.loc[:, 'COSTO'].apply(lambda x: float(x.replace(',', '')))
-   # ajuste presentacion div/2
-   costo_total = f'{costo.sum()/2:,.0f}'
-   return costo_total
+   return kpi_top3
 
 
 # Hoja devoluciones
@@ -88,66 +53,39 @@ cardex = pd.read_csv('datos/bases/inventario/cardex_gral_19-20.TXT', sep='\t', e
 cardex.loc[:, 'FECHA'] = pd.to_datetime(cardex['FECHA'])
 cardex.set_index('FECHA', inplace=True, drop=True)
 
-# Devoluciones
-def devoluciones_total(t, period):
-   devs = cardex.copy()
-   devs = devs.groupby(by=devs.index.to_period(period)).get_group(pd.Period(t))
-   devs = devs.groupby(by='MOVIMIENTO').get_group('Entrada (Devolucion)')
-   devs.reset_index(drop=True, inplace=True)
-   devs_total = f'{devs["ARTS."].sum():,.0f}'
-   return devs_total
-
-
-def top3_devoluciones_total(t, period):
-   devs = cardex.copy()
-   devs = devs.groupby(by=devs.index.to_period(period)).get_group(pd.Period(t))
-   devs = devs.groupby(by='MOVIMIENTO').get_group('Entrada (Devolucion)')[['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', 'ARTS.']]
-   devs = devs.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']).sum()
-   devs = devs.reset_index(drop=False)
-   devs = devs.sort_values(by='ARTS.')
-   devs.reset_index(inplace=True, drop=True)
-   total = devs['ARTS.'].sum()
-   devs = devs.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', 'ARTS.']].tail(3).reset_index(drop=True)
-
-   t3 = []
-   for row in devs.iterrows():
-      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , row[1]['ARTS.']*100 / total))
-
-   return t3
-
-
+devoluciones = cardex.copy().groupby(by='MOVIMIENTO').get_group('Entrada (Devolucion)')
 
 # Hoja Negados
 negados = pd.read_csv('datos/bases/compras/neg_19-20.TXT', sep='\t', encoding='latin_1')
 negados.loc[:, 'FECHA'] = pd.to_datetime(negados['FECHA'])
 negados.set_index('FECHA', inplace=True, drop=True)
 
-# Negados
-def negados_total(t, period):
-   negs = negados.copy()
-   negs = negs.groupby(by=negs.index.to_period(period)).get_group(pd.Period(t))
-   negs.reset_index(drop=True, inplace=True)
-   negs_total = f'{negs["ARTS"].sum():,.0f}'
-   return negs_total
+
+def kpi_by_period(df, col, t, period):
+   df = df.groupby(by=df.index.to_period(period)).get_group(pd.Period(t))
+   df.reset_index(drop=True, inplace=True)
+   df_total = f'{df[col].sum():,.0f}'
+   return df_total
 
 
-def top3_negados_total(t, period):
-   negs = negados.copy()
-   negs = negs.groupby(by=negs.index.to_period(period)).get_group(pd.Period(t))
-   negs = negs.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']).sum()
-   negs = negs.reset_index(drop=False)
-   negs = negs.sort_values(by='ARTS')
-   negs.reset_index(inplace=True, drop=True)
-   total = negs['ARTS'].sum()
-   negs = negs.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', 'ARTS']].tail(3).reset_index(drop=True)
+def top3_kpi_by_period_manual_calc(df, col, t, period):
+   df = df.groupby(by=df.index.to_period(period)).get_group(pd.Period(t))
+   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']).sum()
+   df = df.reset_index(drop=False)
+   df = df.sort_values(by=col)
+   df.reset_index(inplace=True, drop=True)
+   total = df[col].sum()
+   df = df.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', col]].tail(3).reset_index(drop=True)
 
    t3 = []
-   for row in negs.iterrows():
-      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , row[1]['ARTS']*100 / total))
+   for row in df.iterrows():
+      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{(row[1][col]*100 / total):.2f}'))
 
    return t3
 
 
+
+# KPI's globales i.e. 2000+n+1 y 2000+n acumulado
 
 # Hoja de trabajo: Ventas, devoluciones, negados, etc., por artículo
 vtas = pd.read_csv('datos/bases/adm_finanzas/ventas_acumuladas_por_articulo.TXT', sep='\t', encoding='latin_1')
@@ -170,6 +108,7 @@ def top3_dexistencia_total(categoria='ESTILO'):
    t3 = []
    for row in df.iterrows():
       t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1]["DÍAS EXIST"]:.0f}'))
+
    return t3
 
 
@@ -195,78 +134,41 @@ def top3_desplazamiento_total(categoria='ESTILO'):
 
 
 
+
+# Series de tiempo
+
 # Hoja de trabajo: Ventas de articulo por fecha
 zbase = pd.read_csv('datos/bases/transformadas/fs_zapato.csv', engine='python', encoding='utf-8')
 zbase['fecha'] = pd.to_datetime(zbase['fecha'])
+zbase.set_index('fecha', inplace=True, drop=True)
 # Tirar supuestas devoluciones; Número de artículos comprados en 0
 zbase.drop(zbase[zbase['ARTÍCULO ARTS'] == 0].index, inplace=True)
 
 
-def time_series_ventas(f0=2020, period='D'):
-   df = zbase.copy()
+def time_series(df, date_col, n_col, col=None, group=None, f0=2020, period='Y', ts_period='D'):
+   df = df.copy()
+   df = df.groupby(by=df.index.to_period(period)).get_group(pd.Period(f0))
 
    # Quitar hora y minuto y solo dejar fecha
-   df.loc[:, 'fecha'] = df['fecha'].dt.date
+   df.reset_index(drop=False, inplace=True)
+   df.loc[:, date_col] = df[date_col].dt.date
 
-   df = df.groupby('año').get_group(f0)
-   # Monto de ventas
-   mventas = pd.crosstab(index=df['fecha'], columns='ARTÍCULO SUBTOTAL',
-                    values=df['ARTÍCULO SUBTOTAL'], aggfunc=np.sum)
-   # Llenar con 0 días vacios
-   x = pd.date_range(start=min(mventas.index), end=max(mventas.index))
-   mventas = mventas.reindex(x).fillna(0)
-
-   # Agrupar por preiodo de teimpo
-   g = mventas.groupby(by=mventas.index.to_period(period))
-   mventas = g.sum()
-   mventas.index = mventas.index.to_timestamp()
-
-   return mventas
-
-
-def time_series_devs(f0=2020, period='Y', ts_period='D'):
-   devs = cardex.copy()
-   devs = devs.groupby(by=devs.index.to_period(period)).get_group(pd.Period(f0))
-   devs = devs.groupby(by='MOVIMIENTO').get_group('Entrada (Devolucion)')
-
-   # Quitar hora y minuto y solo dejar fecha
-   devs.reset_index(drop=False, inplace=True)
-   devs.loc[:, 'FECHA'] = devs['FECHA'].dt.date
+   # Agrupar por categoría
+   if col != None and group != None:
+      df = df.groupby(by=col).get_group(group)
 
    # Número de devoluciones
-   ndevs = pd.crosstab(index=devs['FECHA'], columns='ARTS.',
-                    values=devs['ARTS.'], aggfunc=np.sum)
+   ndf = pd.crosstab(index=df[date_col], columns=n_col,
+                    values=df[n_col], aggfunc=np.sum)
    # Llenar con 0 días vacios
-   x = pd.date_range(start=min(ndevs.index), end=max(ndevs.index))
-   ndevs = ndevs.reindex(x).fillna(0)
+   x = pd.date_range(start=min(ndf.index), end=max(ndf.index))
+   ndf = ndf.reindex(x).fillna(0)
 
    # Agrupar por preiodo de teimpo
-   g = ndevs.groupby(by=ndevs.index.to_period(ts_period))
-   ndevs = g.sum()
-   ndevs.index = ndevs.index.to_timestamp()
-   return ndevs
-
-
-def time_series_negs(f0=2020, period='Y', ts_period='D'):
-   negs = negados.copy()
-   negs = negs.groupby(by=negs.index.to_period(period)).get_group(pd.Period(f0))
-
-   # Quitar hora y minuto y solo dejar fecha
-   negs.reset_index(drop=False, inplace=True)
-   negs.loc[:, 'FECHA'] = negs['FECHA'].dt.date
-
-   # Número de negados
-   nnegs = pd.crosstab(index=negs['FECHA'], columns='ARTS',
-                    values=negs['ARTS'], aggfunc=np.sum)
-   # Llenar con 0 días vacios
-   x = pd.date_range(start=min(nnegs.index), end=max(nnegs.index))
-   nnegs = nnegs.reindex(x).fillna(0)
-
-   # Agrupar por preiodo de teimpo
-   g = nnegs.groupby(by=nnegs.index.to_period(ts_period))
-   nnegs = g.sum()
-   nnegs.index = nnegs.index.to_timestamp()
-   return nnegs
+   g = ndf.groupby(by=ndf.index.to_period(ts_period))
+   ndf = g.sum()
+   ndf.index = ndf.index.to_timestamp()
+   return ndf
 
 
 def ts_autoarima(df, period='D', n_pred=30):
@@ -377,34 +279,34 @@ def ts_plot_table(df, pred, ajuste, verb, n=7):
 # Para hacer los modelos desde antes y mantenerlos en RAM
 ## Ventas
 # D
-ventas_df_D = time_series_ventas(2020, 'D')
+ventas_df_D = time_series(df=zbase, date_col='fecha', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='D')
 ventas_args_D = ts_autoarima(ventas_df_D, 'D')
 # W
-ventas_df_W = time_series_ventas(2020, 'W')
+ventas_df_W = time_series(df=zbase, date_col='fecha', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
 ventas_args_W = ts_autoarima(ventas_df_W, 'W')
 # M
-ventas_df_M = time_series_ventas(2020, 'M')
+ventas_df_M = time_series(df=zbase, date_col='fecha', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='M')
 ventas_args_M = ts_autoarima(ventas_df_M, 'M')
 
 ## Devoluciones
 # D
-devs_df_D = time_series_devs(2020, 'Y', 'D')
+devs_df_D = time_series(df=devoluciones, date_col='FECHA', n_col='ARTS.', f0=2020, period='Y', ts_period='D')
 devs_args_D = ts_autoarima(devs_df_D, 'D')
 # W
-devs_df_W = time_series_devs(2020, 'Y', 'W')
+devs_df_W = time_series(df=devoluciones ,date_col='FECHA', n_col='ARTS.', f0=2020, period='Y', ts_period='W')
 devs_args_W = ts_autoarima(devs_df_W, 'W')
 # M
-devs_df_M = time_series_devs(2020, 'Y', 'M')
+devs_df_M = time_series(df=devoluciones, date_col='FECHA', n_col='ARTS.', f0=2020, period='Y', ts_period='M')
 devs_args_M = ts_autoarima(devs_df_M, 'M')
 
 ## Negados
 # D
-negs_df_D = time_series_negs(2020, 'Y', 'D')
+negs_df_D = time_series(df=negados, date_col='FECHA', n_col='ARTS', f0=2020, period='Y', ts_period='D')
 negs_args_D = ts_autoarima(negs_df_D, 'D')
 # W
-negs_df_W = time_series_negs(2020, 'Y', 'W')
+negs_df_W = time_series(df=negados, date_col='FECHA', n_col='ARTS', f0=2020, period='Y', ts_period='W')
 negs_args_W = ts_autoarima(negs_df_W, 'W')
 # M
-negs_df_M = time_series_negs(2020, 'Y', 'M')
+negs_df_M = time_series(df=negados, date_col='FECHA', n_col='ARTS', f0=2020, period='Y', ts_period='M')
 negs_args_M = ts_autoarima(negs_df_M, 'M')
 
