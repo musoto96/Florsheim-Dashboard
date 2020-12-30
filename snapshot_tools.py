@@ -8,6 +8,9 @@ import plotly.graph_objects as go
 from pmdarima.arima import auto_arima
 
 
+# Sección 1; General
+
+
 # KPI's  comparativo i.e. 2000+n+1 vs 2000+n
 
 # Hoja de trabajo: Utilidades por artículo
@@ -309,4 +312,34 @@ negs_args_W = ts_autoarima(negs_df_W, 'W')
 # M
 negs_df_M = time_series(df=negados, date_col='FECHA', n_col='ARTS', f0=2020, period='Y', ts_period='M')
 negs_args_M = ts_autoarima(negs_df_M, 'M')
+
+
+
+# Sección 2; Detallado
+
+
+def revenue_bubble_plot():
+   utilidad = ut1['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
+   size = utilidad.apply(lambda x: x if x > 0 else 0.0)
+
+   fig = px.scatter(ut1, y=np.arange(0, len(ut1)), x=utilidad, 
+         size=size, hover_name='ESTILO', 
+         hover_data=['TIENDA', 'MARCA', 'COLOR', 'ACABADO', 'SUELA', 'CONCEPTO'], 
+         labels={'x': '% Utilidad Global', 'y': ''})
+
+   fig.update_layout(
+         hovermode='closest', 
+         hoverlabel={'font_size': 9}, 
+         margin=dict(t=0, b=0, l=0, r=0),
+         plot_bgcolor='white',
+         paper_bgcolor = 'white',
+         title_font_size = 20,
+         title_font_color = 'grey', 
+         showlegend=False, 
+         font_size = 9)
+   fig.update_yaxes(visible=False)
+   fig.update_xaxes(tickformat='.1%')
+
+   return fig
+
 

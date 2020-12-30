@@ -17,6 +17,9 @@ año1 = '2020'
 año0 = '2019'
 
 
+# Sección 1; General
+
+
 def makekpi(name, id, x1, x0, y1, y0, pct, top3, status, icon):
    kpi = dbc.Card(
          children=[ 
@@ -425,13 +428,40 @@ gral = html.Div(
             }
          )
 
-# Detallado
-detal= html.Div(children=[])
 
-# Pestaña primaria
+
+# Sección 2; Detallado
+card_revenue_bubble = dbc.Card(
+      children=[
+         dcc.Graph(figure=st.revenue_bubble_plot(), config={'displayModeBar': False, 'responsive': True})
+         ], 
+      style={
+         'height': '100%', 
+         'marginRight': '5px', 
+         'marginTop': '5px', 
+         'paddingTop': '0px', 
+         'paddingLeft': '0px', 
+         'paddingRight': '0px'}
+      )
+
+# Detallado
+detal= html.Div(
+      children=[ 
+         dbc.Col(card_revenue_bubble, width=3), 
+         dbc.Col(dbc.Card(), width=9)
+         ], 
+      style={
+            'marginLeft': '25px', 
+            'marginRight': '25px', 
+            'marginTop': '5px'
+            }
+      )
+
+
+# Tabulador
 tabs_primary = dbc.Tabs(children=[
    dbc.Tab(gral, label='General', label_style={'fontSize': 14, 'height': '30px', 'fontWeight': 'bold'}), 
-   dbc.Tab(detal, label='Detallado', disabled=True, label_style={'fontSize': 14, 'color': 'lightgrey', 'height': '30px', 'fontWeight': 'bold'})
+   dbc.Tab(detal, label='Detallado', label_style={'fontSize': 14, 'height': '30px', 'fontWeight': 'bold'})
    ], style={
       'marginTop': '5px'
       })

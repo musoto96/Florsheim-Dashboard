@@ -11,8 +11,6 @@ from pmdarima.arima import auto_arima
 cardex = pd.read_csv('datos/bases/inventario/cardex_gral_19-20.TXT', sep='\t', encoding='latin_1')
 cardex.loc[:, 'FECHA'] = pd.to_datetime(cardex['FECHA'])
 cardex.set_index('FECHA', inplace=True, drop=True)
-print(cardex.columns)
-print(cardex.head(10))
 
 # Devoluciones
 def devoluciones_total(t, period):
@@ -100,5 +98,13 @@ def time_series(df, date_col, n_col, col=None, group=None, f0=2020, period='Y', 
    return ndf
 
 
-print(cardex.groupby(by='ACABADO').groups.keys())
-print(time_series(df=cardex, date_col='FECHA', n_col='ARTS.', col='ACABADO', group='100% PIEL', f0=2020, period='Y', ts_period='D'))
+test_slice = time_series(df=cardex, date_col='FECHA', n_col='ARTS.', col='ESTILO', group='FL023016', f0=2020, period='Y', ts_period='D')
+
+
+ut20 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2020.TXT', sep='\t', encoding='latin_1')
+ut19 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2019.TXT', sep='\t', encoding='latin_1')
+
+print(ut20.columns)
+print(ut20.head())
+
+
