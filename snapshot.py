@@ -17,7 +17,10 @@ año1 = '2020'
 año0 = '2019'
 
 
-def makekpi(name, id, x1, x0, y1, y0, pct, top3, status, icon):
+# Sección 1; General
+
+
+def makekpi(name, _id, x1, x0, y1, y0, pct, top3, status, icon):
    kpi = dbc.Card(
          children=[ 
             dbc.CardHeader(
@@ -28,11 +31,11 @@ def makekpi(name, id, x1, x0, y1, y0, pct, top3, status, icon):
             dbc.CardBody(
                children=[
                   dbc.Row(children=[ 
-                     dbc.Col(html.Img(src=f'assets/icons/{icon}', height='80%', id=f'{id}-ind', style={'opacity': 0.5}), style={'padding': '0px', 'text-align': 'right'}), 
+                     dbc.Col(html.Img(src=f'assets/icons/{icon}', height='80%', id=f'{_id}-ind', style={'opacity': 0.5}), style={'padding': '0px', 'text-align': 'right'}), 
                      dbc.Tooltip(
                         children=[
                            html.P(f'Cambio: {pct:.2f}%', style={'margin': '0px', 'fontSize': 9})
-                           ], target=f'{id}-ind', placement='left'
+                           ], target=f'{_id}-ind', placement='left'
                         ), 
                      dbc.Col(html.H5(y1, className='card-title', style={'margin': '0px', 'text-align': 'left', 'color': status})), 
                      dbc.Col(
@@ -52,42 +55,42 @@ def makekpi(name, id, x1, x0, y1, y0, pct, top3, status, icon):
                   dbc.Col(children=[
                      dbc.Row(
                         children=[
-                           dbc.Col(f'{top3[2][0]["ESTILO"]}', id=f'{id}-t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                           dbc.Col(f'{top3[2][0]["ESTILO"]}', id=f'{_id}-t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                            dbc.Tooltip(
                               children=[
                                  html.P(f'Marca: {top3[2][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Color: {top3[2][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Acabado: {top3[2][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Concepto: {top3[2][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                 ], target=f'{id}-t1', placement='bottom'
+                                 ], target=f'{_id}-t1', placement='bottom'
                               ), 
                            dbc.Col(f'{top3[2][1]}%', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                            ]
                         ), 
                      dbc.Row(
                         children=[
-                           dbc.Col(f'{top3[1][0]["ESTILO"]}', id=f'{id}-t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                           dbc.Col(f'{top3[1][0]["ESTILO"]}', id=f'{_id}-t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                            dbc.Tooltip(
                               children=[
                                  html.P(f'Marca: {top3[1][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Color: {top3[1][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Acabado: {top3[1][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Concepto: {top3[1][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                 ], target=f'{id}-t2', placement='bottom'
+                                 ], target=f'{_id}-t2', placement='bottom'
                               ), 
                            dbc.Col(f'{top3[1][1]}%', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                            ]
                         ), 
                      dbc.Row(
                         children=[
-                           dbc.Col(f'{top3[0][0]["ESTILO"]}', id=f'{id}-t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                           dbc.Col(f'{top3[0][0]["ESTILO"]}', id=f'{_id}-t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                            dbc.Tooltip(
                               children=[
                                  html.P(f'Marca: {top3[0][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Color: {top3[0][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Acabado: {top3[0][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                  html.P(f'Concepto: {top3[0][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                 ], target=f'{id}-t3', placement='bottom'
+                                 ], target=f'{_id}-t3', placement='bottom'
                               ), 
                            dbc.Col(f'{top3[0][1]}%', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                            ]
@@ -154,7 +157,7 @@ card_negados = makekpi('Negados', 't4', año1, año0, negados_1, negados_0, nega
 
 # KPIs secundarios
 
-def makekpi_sec(name, id, n, top3):
+def makekpi_sec(name, _id, n, top3):
    kpi = dbc.Card(
          children=[ 
             dbc.CardHeader(
@@ -181,42 +184,42 @@ def makekpi_sec(name, id, n, top3):
                      dbc.Col(children=[
                         dbc.Row(
                            children=[
-                              dbc.Col(f'{top3[2][0]["ESTILO"]}', id=f'{id}-t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                              dbc.Col(f'{top3[2][0]["ESTILO"]}', id=f'{_id}-t1', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                               dbc.Tooltip(
                                  children=[
                                     html.P(f'Marca: {top3[2][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Color: {top3[2][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Acabado: {top3[2][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Concepto: {top3[2][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                    ], target=f'{id}-t1', placement='bottom'
+                                    ], target=f'{_id}-t1', placement='bottom'
                                  ), 
                               dbc.Col(f'{top3[2][1]}', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                               ]
                            ), 
                         dbc.Row(
                            children=[
-                              dbc.Col(f'{top3[1][0]["ESTILO"]}', id=f'{id}-t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                              dbc.Col(f'{top3[1][0]["ESTILO"]}', id=f'{_id}-t2', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                               dbc.Tooltip(
                                  children=[
                                     html.P(f'Marca: {top3[1][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Color: {top3[1][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Acabado: {top3[1][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Concepto: {top3[1][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                    ], target=f'{id}-t2', placement='bottom'
+                                    ], target=f'{_id}-t2', placement='bottom'
                                  ), 
                               dbc.Col(f'{top3[1][1]}', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                               ]
                            ), 
                         dbc.Row(
                            children=[
-                              dbc.Col(f'{top3[0][0]["ESTILO"]}', id=f'{id}-t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
+                              dbc.Col(f'{top3[0][0]["ESTILO"]}', id=f'{_id}-t3', className='card-text', style={'fontSize': 11, 'text-align': 'center'}), 
                               dbc.Tooltip(
                                  children=[
                                     html.P(f'Marca: {top3[0][0]["MARCA"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Color: {top3[0][0]["COLOR"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Acabado: {top3[0][0]["ACABADO"].title()}', style={'margin': '0px', 'fontSize': 9}), 
                                     html.P(f'Concepto: {top3[0][0]["CONCEPTO"].title()}', style={'margin': '0px', 'fontSize': 9})
-                                    ], target=f'{id}-t3', placement='bottom'
+                                    ], target=f'{_id}-t3', placement='bottom'
                                  ), 
                               dbc.Col(f'{top3[0][1]}', className='card-text', style={'fontSize': 11, 'text-align': 'left'})
                               ]
@@ -425,13 +428,40 @@ gral = html.Div(
             }
          )
 
-# Detallado
-detal= html.Div(children=[])
 
-# Pestaña primaria
+
+# Sección 2; Detallado
+card_revenue_bubble = dbc.Card(
+      children=[
+         dcc.Graph(figure=st.revenue_bubble_plot('ESTILO'), config={'displayModeBar': False, 'responsive': True})
+         ], 
+      style={
+         'height': '100%', 
+         'marginRight': '5px', 
+         'marginTop': '5px', 
+         'paddingTop': '0px', 
+         'paddingLeft': '0px', 
+         'paddingRight': '0px'}
+      )
+
+# Detallado
+detal= html.Div(
+      children=[ 
+         dbc.Col(card_revenue_bubble, width=3), 
+         dbc.Col(dbc.Card(), width=9)
+         ], 
+      style={
+            'marginLeft': '25px', 
+            'marginRight': '25px', 
+            'marginTop': '5px'
+            }
+      )
+
+
+# Tabulador
 tabs_primary = dbc.Tabs(children=[
    dbc.Tab(gral, label='General', label_style={'fontSize': 14, 'height': '30px', 'fontWeight': 'bold'}), 
-   dbc.Tab(detal, label='Detallado', disabled=True, label_style={'fontSize': 14, 'color': 'lightgrey', 'height': '30px', 'fontWeight': 'bold'})
+   dbc.Tab(detal, label='Detallado', label_style={'fontSize': 14, 'height': '30px', 'fontWeight': 'bold'})
    ], style={
       'marginTop': '5px'
       })

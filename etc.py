@@ -11,8 +11,6 @@ from pmdarima.arima import auto_arima
 cardex = pd.read_csv('datos/bases/inventario/cardex_gral_19-20.TXT', sep='\t', encoding='latin_1')
 cardex.loc[:, 'FECHA'] = pd.to_datetime(cardex['FECHA'])
 cardex.set_index('FECHA', inplace=True, drop=True)
-print(cardex.columns)
-print(cardex.head(10))
 
 # Devoluciones
 def devoluciones_total(t, period):
@@ -100,5 +98,44 @@ def time_series(df, date_col, n_col, col=None, group=None, f0=2020, period='Y', 
    return ndf
 
 
-print(cardex.groupby(by='ACABADO').groups.keys())
-print(time_series(df=cardex, date_col='FECHA', n_col='ARTS.', col='ACABADO', group='100% PIEL', f0=2020, period='Y', ts_period='D'))
+test_slice = time_series(df=cardex, date_col='FECHA', n_col='ARTS.', col='ESTILO', group='FL023016', f0=2020, period='Y', ts_period='D')
+
+
+ut1 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2020.TXT', sep='\t', encoding='latin_1')
+ut0 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2019.TXT', sep='\t', encoding='latin_1')
+
+
+def revenue_bubble_plot(col):
+   df = ut1.copy()
+   df.loc[:, '% UTILIDAD GLOBAL'] = df['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
+   df = df.groupby(col)['% UTILIDAD GLOBAL'].sum()
+   print(df)
+
+
+revenue_bubble_plot('COLOR')
+
+'''
+   utilidad = df['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
+   size = utilidad.apply(lambda x: x if x > 0 else 0.0)
+
+   fig = px.scatter(df, y=np.arange(0, len(df)), x=utilidad, 
+         size=size, hover_name=col, 
+         hover_data=['ESTILO', 'TIENDA', 'MARCA', 'COLOR', 'ACABADO', 'SUELA', 'CONCEPTO'], 
+         labels={'x': '% Utilidad Global', 'y': ''})
+
+   fig.update_layout(
+         hovermode='closest', 
+         hoverlabel={'font_size': 9}, 
+         margin=dict(t=0, b=0, l=0, r=0),
+         plot_bgcolor='white',
+         paper_bgcolor = 'white',
+         title_font_size = 20,
+         title_font_color = 'grey', 
+         showlegend=False, 
+         font_size = 9)
+   fig.update_yaxes(visible=False)
+   fig.update_xaxes(tickformat='.1%')
+
+   return fig
+'''
+

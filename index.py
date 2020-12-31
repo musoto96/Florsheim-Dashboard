@@ -6,7 +6,7 @@ import importlib
 
 navbar = importlib.import_module(name='navbar')
 snapshot = importlib.import_module(name='snapshot')
-analisis_snapshot = importlib.import_module(name='analisis_snapshot')
+st = importlib.import_module(name='snapshot_tools')
 
 app = dash.Dash(__name__, title='Florsheim', meta_tags=[{'name': 'viewport', 'content': 'height=device-height'}])
 nav = navbar.Navbar()
@@ -29,19 +29,19 @@ def update_ts_label(n):
       [Input('ts', 'value'), Input('ts_period', 'value'), Input('ts_nforecast', 'value')])
 def update_timeseries(ts, period, n):
    ## Ventas
-   ventas_tab_D, ventas_fig_D = analisis_snapshot.ts_plot_table(n=n, verb='Ventas', *analisis_snapshot.ventas_args_D)
-   ventas_tab_W, ventas_fig_W = analisis_snapshot.ts_plot_table(n=n, verb='Ventas', *analisis_snapshot.ventas_args_W)
-   ventas_tab_M, ventas_fig_M = analisis_snapshot.ts_plot_table(n=n, verb='Ventas', *analisis_snapshot.ventas_args_M)
+   ventas_tab_D, ventas_fig_D = st.ts_plot_table(n=n, verb='Ventas', *st.ventas_args_D)
+   ventas_tab_W, ventas_fig_W = st.ts_plot_table(n=n, verb='Ventas', *st.ventas_args_W)
+   ventas_tab_M, ventas_fig_M = st.ts_plot_table(n=n, verb='Ventas', *st.ventas_args_M)
 
    ## Devoluciones
-   devs_tab_D, devs_fig_D = analisis_snapshot.ts_plot_table(n=n, verb='Devoluciones', *analisis_snapshot.devs_args_D)
-   devs_tab_W, devs_fig_W = analisis_snapshot.ts_plot_table(n=n, verb='Devoluciones', *analisis_snapshot.devs_args_W)
-   devs_tab_M, devs_fig_M = analisis_snapshot.ts_plot_table(n=n, verb='Devoluciones', *analisis_snapshot.devs_args_M)
+   devs_tab_D, devs_fig_D = st.ts_plot_table(n=n, verb='Devoluciones', *st.devs_args_D)
+   devs_tab_W, devs_fig_W = st.ts_plot_table(n=n, verb='Devoluciones', *st.devs_args_W)
+   devs_tab_M, devs_fig_M = st.ts_plot_table(n=n, verb='Devoluciones', *st.devs_args_M)
 
    ## Negados
-   negs_tab_D, negs_fig_D = analisis_snapshot.ts_plot_table(n=n, verb='Negados', *analisis_snapshot.negs_args_D)
-   negs_tab_W, negs_fig_W = analisis_snapshot.ts_plot_table(n=n, verb='Negados', *analisis_snapshot.negs_args_W)
-   negs_tab_M, negs_fig_M = analisis_snapshot.ts_plot_table(n=n, verb='Negados', *analisis_snapshot.negs_args_M)
+   negs_tab_D, negs_fig_D = st.ts_plot_table(n=n, verb='Negados', *st.negs_args_D)
+   negs_tab_W, negs_fig_W = st.ts_plot_table(n=n, verb='Negados', *st.negs_args_W)
+   negs_tab_M, negs_fig_M = st.ts_plot_table(n=n, verb='Negados', *st.negs_args_M)
 
    if ts == 'ventas':
       if period == 'D':
