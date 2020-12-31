@@ -4,6 +4,10 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output
 import importlib
 
+
+# Servidor
+host, port = importlib.import_module(name='config').config
+
 navbar = importlib.import_module(name='navbar')
 snapshot = importlib.import_module(name='snapshot')
 st = importlib.import_module(name='snapshot_tools')
@@ -75,5 +79,5 @@ app.layout = html.Div([
    ], style={'height': '100vh'})
 
 if __name__ == '__main__':
-   app.run_server(host='192.168.1.100', port='8085', debug=False)
+   app.run_server(host=host, port=port, debug=False)
 
