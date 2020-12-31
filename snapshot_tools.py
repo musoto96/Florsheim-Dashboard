@@ -40,13 +40,16 @@ def top3_kpi_by_sheet_precalculated(col, x):
       sheet = ut0.copy()
 
    sheet.loc[:, col] = sheet[col].apply(lambda x: float(x.strip('%')))
+   sheet = sheet.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)[col].sum()
+
    sheet = sheet.sort_values(by=col)
    sheet.reset_index(inplace=True, drop=True)
-   sheet = sheet.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', col]].tail(3).reset_index(drop=True)
+
+   top3 = sheet.tail(3).reset_index(drop=True)
 
    kpi_top3 = []
-   for row in sheet.iterrows():
-      kpi_top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , row[1][col]))
+   for row in top3.iterrows():
+      kpi_top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1][col]:.2f}'))
 
    return kpi_top3
 
@@ -75,16 +78,20 @@ def top3_kpi_by_period_manual_calc(df, col, t, period):
    df = df.groupby(by=df.index.to_period(period)).get_group(pd.Period(t))
    df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']).sum()
    df = df.reset_index(drop=False)
+
+   total = df[col].sum()
+
+   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)[col].sum()
    df = df.sort_values(by=col)
    df.reset_index(inplace=True, drop=True)
-   total = df[col].sum()
-   df = df.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', col]].tail(3).reset_index(drop=True)
 
-   t3 = []
-   for row in df.iterrows():
-      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{(row[1][col]*100 / total):.2f}'))
+   t3 = df.tail(3).reset_index(drop=True)
 
-   return t3
+   top3 = []
+   for row in t3.iterrows():
+      top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{(row[1][col]*100 / total):.2f}'))
+
+   return top3
 
 
 
@@ -101,18 +108,22 @@ def dexistencia_total():
    return dexistencia_total
 
 
-def top3_dexistencia_total(categoria='ESTILO'):
+def top3_dexistencia_total():
    df = vtas.copy()
    df = df.dropna(subset=['DÍAS EXIST'])
    df.loc[:, 'DÍAS EXIST'] = df['DÍAS EXIST'].apply(lambda x: float(x.replace(',', '')))
+   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)['DÍAS EXIST'].sum()
+
    df = df.sort_values(by='DÍAS EXIST', ascending=False)
    df.reset_index(inplace=True, drop=True)
-   df = df.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', 'DÍAS EXIST']].dropna().tail(3).reset_index(drop=True)
-   t3 = []
-   for row in df.iterrows():
-      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1]["DÍAS EXIST"]:.0f}'))
 
-   return t3
+   t3 = df.tail(3).reset_index(drop=True)
+
+   top3 = []
+   for row in t3.iterrows():
+      top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1]["DÍAS EXIST"]:.0f}'))
+
+   return top3
 
 
 # Desplazamiento
@@ -123,17 +134,21 @@ def desplazamiento_total():
    return desp_total
 
 
-def top3_desplazamiento_total(categoria='ESTILO'):
+def top3_desplazamiento_total():
    df = vtas.copy()
    df.loc[:, 'DESPLAZAMIENTO %'] = df['DESPLAZAMIENTO %'].dropna().apply(lambda x: float(x.replace('%', '')))
-   df = df.sort_values(by='DESPLAZAMIENTO %', ascending=True)
    df.dropna(subset=['DESPLAZAMIENTO %'], inplace=True)
+   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)['DESPLAZAMIENTO %'].sum()
+
+   df = df.sort_values(by='DESPLAZAMIENTO %', ascending=True)
    df.reset_index(inplace=True, drop=True)
-   df = df.loc[:, ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO', 'DESPLAZAMIENTO %']].dropna().tail(3).reset_index(drop=True)
-   t3 = []
-   for row in df.iterrows():
-      t3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1]["DESPLAZAMIENTO %"]:.0f}%'))
-   return t3
+
+   t3 = df.tail(3).reset_index(drop=True)
+
+   top3 = []
+   for row in t3.iterrows():
+      top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1]["DESPLAZAMIENTO %"]:.0f}%'))
+   return top3
 
 
 
@@ -318,13 +333,18 @@ negs_args_M = ts_autoarima(negs_df_M, 'M')
 # Sección 2; Detallado
 
 
-def revenue_bubble_plot():
-   utilidad = ut1['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
-   size = utilidad.apply(lambda x: x if x > 0 else 0.0)
+def revenue_bubble_plot(col):
+   df = ut1.copy()
+   df.loc[:, '% UTILIDAD GLOBAL'] = df['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
 
-   fig = px.scatter(ut1, y=np.arange(0, len(ut1)), x=utilidad, 
-         size=size, hover_name='ESTILO', 
-         hover_data=['TIENDA', 'MARCA', 'COLOR', 'ACABADO', 'SUELA', 'CONCEPTO'], 
+   cats = ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']
+   utilidad = df.groupby(by=cats, as_index=False)['% UTILIDAD GLOBAL'].sum()
+   #print(utilidad.sort_values(by='% UTILIDAD GLOBAL', ascending=False).head())
+   print(utilidad[utilidad['ESTILO']=='FL023016'])
+   size = utilidad.loc[:, '% UTILIDAD GLOBAL'].apply(lambda x: x if x > 0 else 0.0)
+
+   fig = px.scatter(utilidad, x='% UTILIDAD GLOBAL', y=np.arange(0, len(utilidad)), 
+         size=size, hover_name=col, hover_data=[i for i in cats if i != col], 
          labels={'x': '% Utilidad Global', 'y': ''})
 
    fig.update_layout(
