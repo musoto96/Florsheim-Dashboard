@@ -430,10 +430,25 @@ gral = html.Div(
 
 
 
+
 # Sección 2; Detallado
+
+
+revenue_dropdown = dcc.Dropdown(id='revenue_dropdown', 
+      options=[
+         {'label': 'Modelo', 'value': 'modelo'}, 
+         {'label': 'Estilo', 'value': 'ESTILO'}, 
+         {'label': 'Tienda', 'value': 'TIENDA'}, 
+         {'label': 'Color', 'value': 'COLOR'}, 
+         {'label': 'Acabado', 'value': 'ACABADO'}, 
+         {'label': 'Concepto', 'value': 'CONCEPTO'}
+         ],
+      value='modelo', clearable=False
+      )  
+
 card_revenue_bubble = dbc.Card(
       children=[
-         dcc.Graph(figure=st.revenue_bubble_plot('ESTILO'), config={'displayModeBar': False, 'responsive': True})
+         dcc.Graph(id='revenue_plot', config={'displayModeBar': False, 'responsive': True})
          ], 
       style={
          'height': '100%', 
@@ -446,16 +461,21 @@ card_revenue_bubble = dbc.Card(
 
 # Detallado
 detal= html.Div(
-      children=[ 
-         dbc.Col(card_revenue_bubble, width=3), 
-         dbc.Col(dbc.Card(), width=9)
-         ], 
-      style={
+      dbc.Row(
+         children=[ 
+            dbc.Col(
+               children=[
+                  revenue_dropdown, 
+                  card_revenue_bubble
+                  ], width=3), 
+            dbc.Col(dbc.Card(), width=9)
+            ]), 
+         style={
             'marginLeft': '25px', 
             'marginRight': '25px', 
             'marginTop': '5px'
             }
-      )
+         )
 
 
 # Tabulador

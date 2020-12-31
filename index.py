@@ -21,14 +21,16 @@ nav = navbar.Navbar()
 def page(pathname):
    return snapshot.layout()
 
-# Snapshot
-# Snapshot
+
+# Snapshot; General
+
+# Etiqueta de número de periodos a pronosticar en pestaña general
 @app.callback([Output('ts_nforecast-label', 'children')], 
       [Input('ts_nforecast', 'value')])
 def update_ts_label(n):
    return [n]
 
-
+# Serie de tiempo y ARIMA
 @app.callback([Output('ts_table', 'children'), Output('ts_plot', 'figure')], 
       [Input('ts', 'value'), Input('ts_period', 'value'), Input('ts_nforecast', 'value')])
 def update_timeseries(ts, period, n):
@@ -69,6 +71,15 @@ def update_timeseries(ts, period, n):
       else:
          return [negs_tab_M, negs_fig_M]
 
+
+# Snapshot; Detallado
+
+# Filtro utilidades
+@app.callback([Output('revenue_plot', 'figure')], 
+      [Input('revenue_dropdown', 'value')])
+def update_revenue_bubble_plot(col):
+   fig = st.revenue_bubble_plot(col)
+   return [fig]
 
 app.config.suppress_callback_exceptions = True
 

@@ -337,14 +337,20 @@ def revenue_bubble_plot(col):
    df = ut1.copy()
    df.loc[:, '% UTILIDAD GLOBAL'] = df['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
 
-   cats = ['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']
-   utilidad = df.groupby(by=cats, as_index=False)['% UTILIDAD GLOBAL'].sum()
-   #print(utilidad.sort_values(by='% UTILIDAD GLOBAL', ascending=False).head())
-   print(utilidad[utilidad['ESTILO']=='FL023016'])
+   cats = ['ESTILO', 'TIENDA', 'COLOR', 'ACABADO', 'CONCEPTO']
+
+   if col == 'modelo':
+      col = 'ESTILO'
+      hover_data = [i for i in cats if i != col]
+      utilidad = df.groupby(by=cats, as_index=False)['% UTILIDAD GLOBAL'].sum()
+   else:
+      hover_data = []
+      utilidad = df.groupby(by=col, as_index=False)['% UTILIDAD GLOBAL'].sum()
+      
    size = utilidad.loc[:, '% UTILIDAD GLOBAL'].apply(lambda x: x if x > 0 else 0.0)
 
    fig = px.scatter(utilidad, x='% UTILIDAD GLOBAL', y=np.arange(0, len(utilidad)), 
-         size=size, hover_name=col, hover_data=[i for i in cats if i != col], 
+         size=size, hover_name=col, hover_data=hover_data, 
          labels={'x': '% Utilidad Global', 'y': ''})
 
    fig.update_layout(
