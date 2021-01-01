@@ -6,7 +6,9 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from pmdarima.arima import auto_arima
+import importlib
 
+rf = importlib.import_module('refactor')
 
 # Sección 1; General
 
@@ -15,7 +17,10 @@ from pmdarima.arima import auto_arima
 
 # Hoja de trabajo: Utilidades por artículo
 ut1 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2020.TXT', sep='\t', encoding='latin_1')
+ut1 = rf.refactor_all(ut1, col_concepto='CONCEPTO', col_color='COLOR', col_estilo='ESTILO')
+
 ut0 = pd.read_csv('datos/bases/adm_finanzas/utilidades_por_art_2019.TXT', sep='\t', encoding='latin_1')
+ut0 = rf.refactor_all(ut0, col_concepto='CONCEPTO', col_color='COLOR', col_estilo='ESTILO')
 
 def kpi_by_sheet(col, x, prec=0, pct=False):
    if int(x) == 1:
@@ -40,7 +45,7 @@ def top3_kpi_by_sheet_precalculated(col, x):
       sheet = ut0.copy()
 
    sheet.loc[:, col] = sheet[col].apply(lambda x: float(x.strip('%')))
-   sheet = sheet.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)[col].sum()
+   sheet = sheet.groupby(by=['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto'], as_index=False)[col].sum()
 
    sheet = sheet.sort_values(by=col)
    sheet.reset_index(inplace=True, drop=True)
@@ -49,13 +54,15 @@ def top3_kpi_by_sheet_precalculated(col, x):
 
    kpi_top3 = []
    for row in top3.iterrows():
-      kpi_top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1][col]:.2f}'))
+      kpi_top3.append((row[1][['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto']] , f'{row[1][col]:.2f}'))
 
    return kpi_top3
 
 
 # Hoja devoluciones
 cardex = pd.read_csv('datos/bases/inventario/cardex_gral_19-20.TXT', sep='\t', encoding='latin_1')
+cardex = rf.refactor_all(cardex, col_concepto='CONCEPTO', col_color='COLOR', col_estilo='ESTILO')
+
 cardex.loc[:, 'FECHA'] = pd.to_datetime(cardex['FECHA'])
 cardex.set_index('FECHA', inplace=True, drop=True)
 
@@ -63,6 +70,8 @@ devoluciones = cardex.copy().groupby(by='MOVIMIENTO').get_group('Entrada (Devolu
 
 # Hoja Negados
 negados = pd.read_csv('datos/bases/compras/neg_19-20.TXT', sep='\t', encoding='latin_1')
+negados = rf.refactor_all(negados, col_concepto='CONCEPTO', col_color='COLOR', col_estilo='ESTILO')
+
 negados.loc[:, 'FECHA'] = pd.to_datetime(negados['FECHA'])
 negados.set_index('FECHA', inplace=True, drop=True)
 
@@ -76,12 +85,12 @@ def kpi_by_period(df, col, t, period):
 
 def top3_kpi_by_period_manual_calc(df, col, t, period):
    df = df.groupby(by=df.index.to_period(period)).get_group(pd.Period(t))
-   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']).sum()
+   df = df.groupby(by=['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto']).sum()
    df = df.reset_index(drop=False)
 
    total = df[col].sum()
 
-   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)[col].sum()
+   df = df.groupby(by=['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto'], as_index=False)[col].sum()
    df = df.sort_values(by=col)
    df.reset_index(inplace=True, drop=True)
 
@@ -89,7 +98,7 @@ def top3_kpi_by_period_manual_calc(df, col, t, period):
 
    top3 = []
    for row in t3.iterrows():
-      top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{(row[1][col]*100 / total):.2f}'))
+      top3.append((row[1][['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto']] , f'{(row[1][col]*100 / total):.2f}'))
 
    return top3
 
@@ -99,6 +108,7 @@ def top3_kpi_by_period_manual_calc(df, col, t, period):
 
 # Hoja de trabajo: Ventas, devoluciones, negados, etc., por artículo
 vtas = pd.read_csv('datos/bases/adm_finanzas/ventas_acumuladas_por_articulo.TXT', sep='\t', encoding='latin_1')
+vtas = rf.refactor_all(vtas, col_concepto='CONCEPTO', col_color='COLOR', col_estilo='ESTILO')
 
 # Días existencia
 def dexistencia_total():
@@ -112,7 +122,7 @@ def top3_dexistencia_total():
    df = vtas.copy()
    df = df.dropna(subset=['DÍAS EXIST'])
    df.loc[:, 'DÍAS EXIST'] = df['DÍAS EXIST'].apply(lambda x: float(x.replace(',', '')))
-   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)['DÍAS EXIST'].sum()
+   df = df.groupby(by=['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto'], as_index=False)['DÍAS EXIST'].sum()
 
    df = df.sort_values(by='DÍAS EXIST', ascending=False)
    df.reset_index(inplace=True, drop=True)
@@ -121,7 +131,7 @@ def top3_dexistencia_total():
 
    top3 = []
    for row in t3.iterrows():
-      top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1]["DÍAS EXIST"]:.0f}'))
+      top3.append((row[1][['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto']] , f'{row[1]["DÍAS EXIST"]:.0f}'))
 
    return top3
 
@@ -138,7 +148,7 @@ def top3_desplazamiento_total():
    df = vtas.copy()
    df.loc[:, 'DESPLAZAMIENTO %'] = df['DESPLAZAMIENTO %'].dropna().apply(lambda x: float(x.replace('%', '')))
    df.dropna(subset=['DESPLAZAMIENTO %'], inplace=True)
-   df = df.groupby(by=['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO'], as_index=False)['DESPLAZAMIENTO %'].sum()
+   df = df.groupby(by=['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto'], as_index=False)['DESPLAZAMIENTO %'].sum()
 
    df = df.sort_values(by='DESPLAZAMIENTO %', ascending=True)
    df.reset_index(inplace=True, drop=True)
@@ -147,7 +157,7 @@ def top3_desplazamiento_total():
 
    top3 = []
    for row in t3.iterrows():
-      top3.append((row[1][['ESTILO', 'MARCA', 'COLOR', 'ACABADO', 'CONCEPTO']] , f'{row[1]["DESPLAZAMIENTO %"]:.0f}%'))
+      top3.append((row[1][['ESTILO', 'MARCA', 'color', 'ACABADO', 'concepto']] , f'{row[1]["DESPLAZAMIENTO %"]:.0f}%'))
    return top3
 
 
@@ -156,14 +166,23 @@ def top3_desplazamiento_total():
 # Series de tiempo
 
 # Hoja de trabajo: Ventas de articulo por fecha
-zbase = pd.read_csv('datos/bases/transformadas/fs_zapato.csv', engine='python', encoding='utf-8')
-zbase['fecha'] = pd.to_datetime(zbase['fecha'])
-zbase.set_index('fecha', inplace=True, drop=True)
+#zbase = pd.read_csv('datos/bases/transformadas/fs_zapato.csv', engine='python', encoding='utf-8')
+base = pd.read_csv('datos/bases/adm_finanzas/ventas_19-20.TXT', sep='\t', engine='python', encoding='latin_1')
+
+# variables numéricas de 0 -> nan
+num_vars = ['ARTÍCULO PRECIO', 'ARTÍCULO IMPORTE', 'ARTÍCULO SUBTOTAL', 'FORMA DE PAGO IMPORTE']
+for i in num_vars: 
+   base.loc[:, i].replace(0, np.nan, inplace=True)
+
+base = rf.refactor_all(base, col_concepto='ARTÍCULO CONCEPTO', col_color='ARTÍCULO COLOR', col_estilo='ARTÍCULO ESTILO')
+
+base.loc[:, 'NOTA DE VENTA FECHA'] = pd.to_datetime(base['NOTA DE VENTA FECHA'])
+base.set_index('NOTA DE VENTA FECHA', inplace=True, drop=True)
 # Tirar supuestas devoluciones; Número de artículos comprados en 0
-zbase.drop(zbase[zbase['ARTÍCULO ARTS'] == 0].index, inplace=True)
+base.drop(base[base['ARTÍCULO ARTS'] == 0].index, inplace=True)
 
 
-def time_series(date_col, n_col, df=zbase, group=None, value=None, f0=2020, period='Y', ts_period='D'):
+def time_series(date_col, n_col, df=base, group=None, value=None, f0=2020, period='Y', ts_period='D'):
    df = df.copy()
    df = df.groupby(by=df.index.to_period(period)).get_group(pd.Period(f0))
 
@@ -190,11 +209,11 @@ def time_series(date_col, n_col, df=zbase, group=None, value=None, f0=2020, peri
    return ndf
 
 
-def time_series_plot(df, verb):
+def time_series_plot(df, verb, watermark=False, watermark_text1='', watermark_text2=''):
    fig = go.Figure()
 
-   fig.add_trace(go.Scatter(mode='lines+markers', x=df['fecha'], y=df['y'], 
-      line={'color': 'royalblue'}, name='', 
+   fig.add_trace(go.Scatter(mode='lines', fill='tozeroy', x=df['fecha'], y=df['y'], 
+      line={'color': 'mediumorchid'}, name='', 
       hovertemplate='Fecha: %{x}<br><b>'+f'{verb}:'+'</b> %{y:$,.2f}'))
 
    fig.update_xaxes(rangeslider_visible=True, 
@@ -208,9 +227,10 @@ def time_series_plot(df, verb):
                ])
             ), 
          showline=False, linecolor='lightgrey', linewidth=1, mirror=True)
-   fig.update_yaxes(showline=False, linecolor='lightgrey', linewidth=1, mirror=True)
+   fig.update_yaxes(showline=False, fixedrange=False, linecolor='lightgrey', linewidth=1, mirror=True)
 
    fig.update_layout(
+         yaxis_range=[0, df['y'].max()*1.5], 
          hovermode='closest', 
          hoverlabel={'font_size': 9}, 
          margin=dict(t=0, b=0, l=0, r=0),
@@ -220,6 +240,11 @@ def time_series_plot(df, verb):
          title_font_color = 'grey', 
          showlegend=False, 
          font_size = 9)
+
+   if watermark == True:
+      fig.add_annotation(text='Venta Semanal<br>'+f'{watermark_text1.title()}: {watermark_text2.title()}', xref='paper', yref='paper', x=0.5, y=0.5)
+      fig.update_layout(annotations=[{'showarrow': False, 'opacity': 0.2, 'font_size': 40}])
+
    return fig
 
 
@@ -261,7 +286,7 @@ def ts_autoarima(df, period='D', n_pred=30):
 
 
 # Serie de tiempo y pronostico
-def time_series_plot_autoarima(df, pred, ajuste, verb, n=7):
+def time_series_plot_autoarima(df, pred, ajuste, verb, suf='$', n=7):
    pred = pred[:n]
 
    # Tabla
@@ -276,31 +301,31 @@ def time_series_plot_autoarima(df, pred, ajuste, verb, n=7):
    # Reales
    fig.add_trace(go.Scatter(mode='markers', x=df['fecha'], y=df['y'], 
       line={'color': 'royalblue'}, name='', 
-      hovertemplate='Fecha: %{x}<br><b>'+f'{verb}:'+'</b> %{y:$,.2f}'))
+      hovertemplate='Fecha: %{x}<br><b>'+f'{verb}:'+'</b> '+f'{suf}'+'%{y:,.2f}'))
    # Ajustados
    fig.add_trace(go.Scatter(mode='lines', x=ajuste['fecha'], y=ajuste['y_hat'], 
       line={'color': 'violet'}, name='', 
-      hovertemplate='Fecha: %{x}<br><b>Esperado:</b> %{y:$,.2f}'))
+      hovertemplate='Fecha: %{x}<br><b>Esperado:</b> '+f'{suf}'+'%{y:,.2f}'))
    # Intervalo inferior ajuste
    fig.add_trace(go.Scatter(mode='lines', x=ajuste['fecha'], y=ajuste['inf'], 
       fill=None, line={'width': 0, 'color': 'thistle'}, name='', 
-      hovertemplate='Fecha: %{x}<br><b>Límite Inferior:</b> %{y:$,.2f}'))
+      hovertemplate='Fecha: %{x}<br><b>Límite Inferior:</b> '+f'{suf}'+'%{y:,.2f}'))
    # Intervalo superior ajuste
    fig.add_trace(go.Scatter(mode='lines', x=ajuste['fecha'], y=ajuste['sup'], 
       fill='tonexty', line={'width': 0, 'color': 'thistle'}, name='', 
-      hovertemplate='Fecha: %{x}<br><b>Límite Superior:</b> %{y:$,.2f}'))
+      hovertemplate='Fecha: %{x}<br><b>Límite Superior:</b> '+f'{suf}'+'%{y:,.2f}'))
    # Prediccion
    fig.add_trace(go.Scatter(mode='markers', x=pred['fecha'], y=pred['y_hat'], 
       line={'color': 'violet'}, name='', 
-      hovertemplate='Fecha: %{x}<br><b>Pronóstico:</b> %{y:$,.2f}'))
+      hovertemplate='Fecha: %{x}<br><b>Pronóstico:</b> '+f'{suf}'+'%{y:,.2f}'))
    # Intervalo inferior
    fig.add_trace(go.Scatter(mode='lines', x=pred['fecha'], y=pred['inf'], 
       fill=None, line={'width': 0, 'color': 'violet'}, name='', 
-      hovertemplate='Fecha: %{x}<br><b>Límite Inferior:</b> %{y:$,.2f}'))
+      hovertemplate='Fecha: %{x}<br><b>Límite Inferior:</b> '+f'{suf}'+'%{y:,.2f}'))
    # Intervalo superior
    fig.add_trace(go.Scatter(mode='lines', x=pred['fecha'], y=pred['sup'], 
       fill='tonexty', line={'width': 0, 'color': 'violet'}, name='', 
-      hovertemplate='Fecha: %{x}<br><b>Límite Superior:</b> %{y:$,.2f}'))
+      hovertemplate='Fecha: %{x}<br><b>Límite Superior:</b> '+f'{suf}'+'%{y:,.2f}'))
 
    fig.update_xaxes(rangeslider_visible=True, 
          range=[df.iloc[-5, df.columns.get_loc('fecha')], max(pred['fecha'])+datetime.timedelta(days=1)], fixedrange=False, 
@@ -331,13 +356,13 @@ def time_series_plot_autoarima(df, pred, ajuste, verb, n=7):
 # Para hacer los modelos desde antes y mantenerlos en RAM
 ## Ventas
 # D
-ventas_df_D = time_series(df=zbase, date_col='fecha', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='D')
+ventas_df_D = time_series(df=base, date_col='NOTA DE VENTA FECHA', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='D')
 ventas_args_D = ts_autoarima(ventas_df_D, 'D')
 # W
-ventas_df_W = time_series(df=zbase, date_col='fecha', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
+ventas_df_W = time_series(df=base, date_col='NOTA DE VENTA FECHA', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
 ventas_args_W = ts_autoarima(ventas_df_W, 'W')
 # M
-ventas_df_M = time_series(df=zbase, date_col='fecha', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='M')
+ventas_df_M = time_series(df=base, date_col='NOTA DE VENTA FECHA', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='M')
 ventas_args_M = ts_autoarima(ventas_df_M, 'M')
 
 ## Devoluciones
@@ -368,6 +393,7 @@ negs_args_M = ts_autoarima(negs_df_M, 'M')
 
 
 def revenue_bubble_plot(col):
+   select = col
    df = ut1.copy()
    df.loc[:, '% UTILIDAD GLOBAL'] = df['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
 
@@ -375,9 +401,13 @@ def revenue_bubble_plot(col):
    size = utilidad.loc[:, '% UTILIDAD GLOBAL'].apply(lambda x: x if x > 0 else 0.0)
 
    fig = px.scatter(utilidad, x='% UTILIDAD GLOBAL', y=np.arange(0, len(utilidad)), 
-         size=size, hover_name=col, labels={'x': '% Utilidad Global', 'y': ''})
+         size=size, text=col, labels={'x': '% Utilidad Global', 'y': ''})
 
    fig.update_layout(
+         xaxis_range=[0-0.25*utilidad['% UTILIDAD GLOBAL'].max(), 
+            utilidad['% UTILIDAD GLOBAL'].max()*1.25], 
+         yaxis_range=[0-0.25*len(utilidad), len(utilidad)*1.25], 
+
          hovermode='closest', 
          hoverlabel={'font_size': 9}, 
          margin=dict(t=0, b=0, l=0, r=0),
@@ -387,8 +417,10 @@ def revenue_bubble_plot(col):
          title_font_color = 'grey', 
          showlegend=False, 
          font_size = 9)
-   fig.update_yaxes(visible=False)
+   fig.update_yaxes(visible=False,)
    fig.update_xaxes(tickformat='.1%')
+   fig.update_traces(textposition='top center', 
+         hovertemplate='<extra></extra><b>' + f'{col.title()}' +'</b><br>Selección: %{text}' + '<br>Utilidad Global: %{x}')
 
    return fig
 

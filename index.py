@@ -40,14 +40,14 @@ def update_timeseries(ts, period, n):
    ventas_tab_M, ventas_fig_M = st.time_series_plot_autoarima(n=n, verb='Ventas', *st.ventas_args_M)
 
    ## Devoluciones
-   devs_tab_D, devs_fig_D = st.time_series_plot_autoarima(n=n, verb='Devoluciones', *st.devs_args_D)
-   devs_tab_W, devs_fig_W = st.time_series_plot_autoarima(n=n, verb='Devoluciones', *st.devs_args_W)
-   devs_tab_M, devs_fig_M = st.time_series_plot_autoarima(n=n, verb='Devoluciones', *st.devs_args_M)
+   devs_tab_D, devs_fig_D = st.time_series_plot_autoarima(n=n, verb='Devoluciones', suf='', *st.devs_args_D)
+   devs_tab_W, devs_fig_W = st.time_series_plot_autoarima(n=n, verb='Devoluciones', suf='', *st.devs_args_W)
+   devs_tab_M, devs_fig_M = st.time_series_plot_autoarima(n=n, verb='Devoluciones', suf='', *st.devs_args_M)
 
    ## Negados
-   negs_tab_D, negs_fig_D = st.time_series_plot_autoarima(n=n, verb='Negados', *st.negs_args_D)
-   negs_tab_W, negs_fig_W = st.time_series_plot_autoarima(n=n, verb='Negados', *st.negs_args_W)
-   negs_tab_M, negs_fig_M = st.time_series_plot_autoarima(n=n, verb='Negados', *st.negs_args_M)
+   negs_tab_D, negs_fig_D = st.time_series_plot_autoarima(n=n, verb='Negados', suf='', *st.negs_args_D)
+   negs_tab_W, negs_fig_W = st.time_series_plot_autoarima(n=n, verb='Negados', suf='', *st.negs_args_W)
+   negs_tab_M, negs_fig_M = st.time_series_plot_autoarima(n=n, verb='Negados', suf='', *st.negs_args_M)
 
    if ts == 'ventas':
       if period == 'D':
@@ -83,29 +83,25 @@ def update_revenue_bubble_plot(col):
 
 # Serie de tiempo de selección
 @app.callback([Output('ts_plot_selection', 'figure')], 
-      [Input('revenue_dropdown', 'value'), Input('revenue_plot', 'clickData')])
-def selection_time_series(col, click_data):
+      [Input('revenue_dropdown', 'value'), Input('revenue_plot', 'hoverData')])
+def selection_time_series(col, hover_data):
    if col == 'ESTILO':
       group = 'ARTÍCULO ESTILO'
    elif col == 'TIENDA':
       group = 'NOTA DE VENTA TIENDA'
-   elif col == 'COLOR':
-      group = 'color'
    elif col == 'ACABADO':
       group = 'ARTÍCULO ACABADO'
-   elif col == 'CONCEPTO':
-      group = 'concepto'
    else:
-      group = 'ARTÍCULO ESTILO'
+      group = col
 
-   value = click_data['points'][0]['hovertext']
+   value = hover_data['points'][0]['text']
 
-   s = st.time_series(group=group, value=value, date_col='fecha', 
-         n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='D')
+   s = st.time_series(group=group, value=value, date_col='NOTA DE VENTA FECHA', 
+         n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
    df = s.reset_index()
    df.rename(columns={'index': 'fecha', df.columns[1]: 'y'}, inplace=True)
 
-   return [st.time_series_plot(df, verb='Ventas')]
+   return [st.time_series_plot(df, verb='Ventas', watermark=True, watermark_text1=group, watermark_text2=value)]
 
 
 
