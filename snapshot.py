@@ -436,19 +436,20 @@ gral = html.Div(
 
 revenue_dropdown = dcc.Dropdown(id='revenue_dropdown', 
       options=[
-         {'label': 'Modelo', 'value': 'modelo'}, 
          {'label': 'Estilo', 'value': 'ESTILO'}, 
          {'label': 'Tienda', 'value': 'TIENDA'}, 
          {'label': 'Color', 'value': 'COLOR'}, 
          {'label': 'Acabado', 'value': 'ACABADO'}, 
          {'label': 'Concepto', 'value': 'CONCEPTO'}
          ],
-      value='modelo', clearable=False
+      value='ESTILO', clearable=False
       )  
 
 card_revenue_bubble = dbc.Card(
       children=[
-         dcc.Graph(id='revenue_plot', config={'displayModeBar': False, 'responsive': True})
+         dcc.Graph(id='revenue_plot', figure=st.revenue_bubble_plot(col='ESTILO'), 
+            clickData={'points': [{'hovertext': 'FL023016'}]},
+            config={'displayModeBar': False, 'responsive': True})
          ], 
       style={
          'height': '100%', 
@@ -459,6 +460,21 @@ card_revenue_bubble = dbc.Card(
          'paddingRight': '0px'}
       )
 
+
+# Serie de tiempo de selección
+card_ts_selection = dbc.Card(
+      dcc.Graph(id='ts_plot_selection', config={'displayModeBar': False, 'responsive': True}),
+      style={
+         'height': '100%', 
+         'marginRight': '5px', 
+         'marginTop': '5px', 
+         'paddingTop': '0px', 
+         'paddingLeft': '0px', 
+         'paddingRight': '0px'}
+      )
+
+
+
 # Detallado
 detal= html.Div(
       dbc.Row(
@@ -468,7 +484,7 @@ detal= html.Div(
                   revenue_dropdown, 
                   card_revenue_bubble
                   ], width=3), 
-            dbc.Col(dbc.Card(), width=9)
+            dbc.Col(card_ts_selection, width=9)
             ]), 
          style={
             'marginLeft': '25px', 

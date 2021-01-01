@@ -163,17 +163,18 @@ zbase.set_index('fecha', inplace=True, drop=True)
 zbase.drop(zbase[zbase['ARTÍCULO ARTS'] == 0].index, inplace=True)
 
 
-def time_series(df, date_col, n_col, col=None, group=None, f0=2020, period='Y', ts_period='D'):
+def time_series(date_col, n_col, df=zbase, group=None, value=None, f0=2020, period='Y', ts_period='D'):
    df = df.copy()
    df = df.groupby(by=df.index.to_period(period)).get_group(pd.Period(f0))
 
    # Quitar hora y minuto y solo dejar fecha
    df.reset_index(drop=False, inplace=True)
    df.loc[:, date_col] = df[date_col].dt.date
-
+   
    # Agrupar por categoría
-   if col != None and group != None:
-      df = df.groupby(by=col).get_group(group)
+   if group != None and value != None:
+      df = df.groupby(by=group).get_group(value)
+      df.reset_index(drop=True, inplace=True)
 
    # Número de devoluciones
    ndf = pd.crosstab(index=df[date_col], columns=n_col,
@@ -187,6 +188,39 @@ def time_series(df, date_col, n_col, col=None, group=None, f0=2020, period='Y', 
    ndf = g.sum()
    ndf.index = ndf.index.to_timestamp()
    return ndf
+
+
+def time_series_plot(df, verb):
+   fig = go.Figure()
+
+   fig.add_trace(go.Scatter(mode='lines+markers', x=df['fecha'], y=df['y'], 
+      line={'color': 'royalblue'}, name='', 
+      hovertemplate='Fecha: %{x}<br><b>'+f'{verb}:'+'</b> %{y:$,.2f}'))
+
+   fig.update_xaxes(rangeslider_visible=True, 
+         fixedrange=False, 
+         rangeselector=dict(
+            buttons=list([
+               dict(count=1, label="1m", step="month", stepmode="backward"),
+               dict(count=6, label="6m", step="month", stepmode="backward"),
+               dict(count=1, label="1 Año", step="year", stepmode="backward"),
+               dict(count=1, label="Total", step="all", stepmode="todate")
+               ])
+            ), 
+         showline=False, linecolor='lightgrey', linewidth=1, mirror=True)
+   fig.update_yaxes(showline=False, linecolor='lightgrey', linewidth=1, mirror=True)
+
+   fig.update_layout(
+         hovermode='closest', 
+         hoverlabel={'font_size': 9}, 
+         margin=dict(t=0, b=0, l=0, r=0),
+         plot_bgcolor='white',
+         paper_bgcolor = 'white',
+         title_font_size = 20,
+         title_font_color = 'grey', 
+         showlegend=False, 
+         font_size = 9)
+   return fig
 
 
 def ts_autoarima(df, period='D', n_pred=30):
@@ -227,7 +261,7 @@ def ts_autoarima(df, period='D', n_pred=30):
 
 
 # Serie de tiempo y pronostico
-def ts_plot_table(df, pred, ajuste, verb, n=7):
+def time_series_plot_autoarima(df, pred, ajuste, verb, n=7):
    pred = pred[:n]
 
    # Tabla
@@ -337,21 +371,11 @@ def revenue_bubble_plot(col):
    df = ut1.copy()
    df.loc[:, '% UTILIDAD GLOBAL'] = df['% UTILIDAD GLOBAL'].apply(lambda x: float(x.replace('%','')) / 100)
 
-   cats = ['ESTILO', 'TIENDA', 'COLOR', 'ACABADO', 'CONCEPTO']
-
-   if col == 'modelo':
-      col = 'ESTILO'
-      hover_data = [i for i in cats if i != col]
-      utilidad = df.groupby(by=cats, as_index=False)['% UTILIDAD GLOBAL'].sum()
-   else:
-      hover_data = []
-      utilidad = df.groupby(by=col, as_index=False)['% UTILIDAD GLOBAL'].sum()
-      
+   utilidad = df.groupby(by=col, as_index=False)['% UTILIDAD GLOBAL'].sum()
    size = utilidad.loc[:, '% UTILIDAD GLOBAL'].apply(lambda x: x if x > 0 else 0.0)
 
    fig = px.scatter(utilidad, x='% UTILIDAD GLOBAL', y=np.arange(0, len(utilidad)), 
-         size=size, hover_name=col, hover_data=hover_data, 
-         labels={'x': '% Utilidad Global', 'y': ''})
+         size=size, hover_name=col, labels={'x': '% Utilidad Global', 'y': ''})
 
    fig.update_layout(
          hovermode='closest', 

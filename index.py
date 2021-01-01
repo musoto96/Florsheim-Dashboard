@@ -35,19 +35,19 @@ def update_ts_label(n):
       [Input('ts', 'value'), Input('ts_period', 'value'), Input('ts_nforecast', 'value')])
 def update_timeseries(ts, period, n):
    ## Ventas
-   ventas_tab_D, ventas_fig_D = st.ts_plot_table(n=n, verb='Ventas', *st.ventas_args_D)
-   ventas_tab_W, ventas_fig_W = st.ts_plot_table(n=n, verb='Ventas', *st.ventas_args_W)
-   ventas_tab_M, ventas_fig_M = st.ts_plot_table(n=n, verb='Ventas', *st.ventas_args_M)
+   ventas_tab_D, ventas_fig_D = st.time_series_plot_autoarima(n=n, verb='Ventas', *st.ventas_args_D)
+   ventas_tab_W, ventas_fig_W = st.time_series_plot_autoarima(n=n, verb='Ventas', *st.ventas_args_W)
+   ventas_tab_M, ventas_fig_M = st.time_series_plot_autoarima(n=n, verb='Ventas', *st.ventas_args_M)
 
    ## Devoluciones
-   devs_tab_D, devs_fig_D = st.ts_plot_table(n=n, verb='Devoluciones', *st.devs_args_D)
-   devs_tab_W, devs_fig_W = st.ts_plot_table(n=n, verb='Devoluciones', *st.devs_args_W)
-   devs_tab_M, devs_fig_M = st.ts_plot_table(n=n, verb='Devoluciones', *st.devs_args_M)
+   devs_tab_D, devs_fig_D = st.time_series_plot_autoarima(n=n, verb='Devoluciones', *st.devs_args_D)
+   devs_tab_W, devs_fig_W = st.time_series_plot_autoarima(n=n, verb='Devoluciones', *st.devs_args_W)
+   devs_tab_M, devs_fig_M = st.time_series_plot_autoarima(n=n, verb='Devoluciones', *st.devs_args_M)
 
    ## Negados
-   negs_tab_D, negs_fig_D = st.ts_plot_table(n=n, verb='Negados', *st.negs_args_D)
-   negs_tab_W, negs_fig_W = st.ts_plot_table(n=n, verb='Negados', *st.negs_args_W)
-   negs_tab_M, negs_fig_M = st.ts_plot_table(n=n, verb='Negados', *st.negs_args_M)
+   negs_tab_D, negs_fig_D = st.time_series_plot_autoarima(n=n, verb='Negados', *st.negs_args_D)
+   negs_tab_W, negs_fig_W = st.time_series_plot_autoarima(n=n, verb='Negados', *st.negs_args_W)
+   negs_tab_M, negs_fig_M = st.time_series_plot_autoarima(n=n, verb='Negados', *st.negs_args_M)
 
    if ts == 'ventas':
       if period == 'D':
@@ -72,14 +72,42 @@ def update_timeseries(ts, period, n):
          return [negs_tab_M, negs_fig_M]
 
 
+
 # Snapshot; Detallado
 
-# Filtro utilidades
 @app.callback([Output('revenue_plot', 'figure')], 
       [Input('revenue_dropdown', 'value')])
 def update_revenue_bubble_plot(col):
-   fig = st.revenue_bubble_plot(col)
-   return [fig]
+   return [st.revenue_bubble_plot(col)]
+
+
+# Serie de tiempo de selección
+@app.callback([Output('ts_plot_selection', 'figure')], 
+      [Input('revenue_dropdown', 'value'), Input('revenue_plot', 'clickData')])
+def selection_time_series(col, click_data):
+   if col == 'ESTILO':
+      group = 'ARTÍCULO ESTILO'
+   elif col == 'TIENDA':
+      group = 'NOTA DE VENTA TIENDA'
+   elif col == 'COLOR':
+      group = 'color'
+   elif col == 'ACABADO':
+      group = 'ARTÍCULO ACABADO'
+   elif col == 'CONCEPTO':
+      group = 'concepto'
+   else:
+      group = 'ARTÍCULO ESTILO'
+
+   value = click_data['points'][0]['hovertext']
+
+   s = st.time_series(group=group, value=value, date_col='fecha', 
+         n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='D')
+   df = s.reset_index()
+   df.rename(columns={'index': 'fecha', df.columns[1]: 'y'}, inplace=True)
+
+   return [st.time_series_plot(df, verb='Ventas')]
+
+
 
 app.config.suppress_callback_exceptions = True
 
