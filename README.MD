@@ -49,12 +49,14 @@ Catálogo de variables.
 
 
 | Nueva Variable | Categoría |
+| --- | --- |
 | Zapato | Vestir, Casual, Confort, Urbano, Botas, Sport, Trabajo, Dama |
 | Accesorio | Accesorios, Consumibles |
 | Otro | Marroquinería |
 
 
 | Nuevos Valores | Color |
+| --- | --- |
 | Negro | Negro |
 | Café/Chocolate | Café, Chocolate |
 | Café/Cognac | Cognac, Café Claro |
@@ -68,6 +70,7 @@ Catálogo de variables.
 
 
 | Nueva Variable | Tono |
+| --- | --- |
 | Oscuro | Negro, Chocolate, Vino, Azul Marino |
 | Mediano | Café, Azul, Cognac | 
 | Claro | Café Claro, Tan, Arena, Miel, Almendra, Veige, Gris, Blanco | 
@@ -75,11 +78,13 @@ Catálogo de variables.
 
 
 | Nueva Variable | Material |
+| --- | --- |
 | Piel | Piel, Gamuza, Cerdo, Ternera, Becerro, Venado, Ante Buck, Ante Nobuck, Charol | 
 | Tela | Algodón, Nylon, Sintético, Lona |
 
 
 | Nueva Variable | Origen |
+| --- | --- |
 | Empieza con F | Nacional |
 | Empieza con 5 caracteres seguidos de un guión | Internacional | 
 
