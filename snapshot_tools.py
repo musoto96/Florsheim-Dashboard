@@ -216,7 +216,7 @@ def time_series_plot(df, verb, watermark=False, watermark_text1='', watermark_te
       line={'color': 'mediumorchid'}, name='', 
       hovertemplate='Fecha: %{x}<br><b>'+f'{verb}:'+'</b> %{y:$,.2f}'))
 
-   fig.update_xaxes(rangeslider_visible=True, 
+   fig.update_xaxes(rangeslider_visible=False, 
          fixedrange=False, 
          rangeselector=dict(
             buttons=list([
@@ -248,7 +248,7 @@ def time_series_plot(df, verb, watermark=False, watermark_text1='', watermark_te
    return fig
 
 
-def ts_autoarima(df, period='D', n_pred=30):
+def ts_autoarima(df, period='D', n_pred=30, m=1):
    # Multiplos de tiempo
    if period == 'W':
       weeks, days = n_pred, 0
@@ -263,11 +263,11 @@ def ts_autoarima(df, period='D', n_pred=30):
    xp = pd.period_range(start=min_x, end=max_x, freq=period)
    xp = xp[:n_pred].to_timestamp()
 
-   model = auto_arima(df)
-   y_hat, conf = model.predict(n_periods=n_pred, index=xp, return_conf_int=True)
+   model = auto_arima(df, m=m)
+   y_hat, conf = model.predict(n_periods=n_pred, index=xp, return_conf_int=True, alpha=0.2)
    pred = pd.DataFrame({'y_hat': y_hat, 'inf': conf[:, 0], 'sup': conf[:, 1]}, index=xp)
 
-   y_fit , conf_fit = model.predict_in_sample(start=1, end=len(df.index), return_conf_int=True)
+   y_fit , conf_fit = model.predict_in_sample(start=1, end=len(df.index), return_conf_int=True, alpha=0.2)
    ajuste = pd.DataFrame({'y_hat': y_fit, 'inf': conf_fit[:, 0], 'sup': conf_fit[:, 1]}, index=df.index)
 
    # Nuevo indice para agregar primer dato
@@ -357,35 +357,35 @@ def time_series_plot_autoarima(df, pred, ajuste, verb, suf='$', n=7):
 ## Ventas
 # D
 ventas_df_D = time_series(df=base, date_col='NOTA DE VENTA FECHA', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='D')
-ventas_args_D = ts_autoarima(ventas_df_D, 'D')
+ventas_args_D = ts_autoarima(ventas_df_D, 'D', m=7)
 # W
 ventas_df_W = time_series(df=base, date_col='NOTA DE VENTA FECHA', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
-ventas_args_W = ts_autoarima(ventas_df_W, 'W')
+ventas_args_W = ts_autoarima(ventas_df_W, 'W', m=4)
 # M
 ventas_df_M = time_series(df=base, date_col='NOTA DE VENTA FECHA', n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='M')
-ventas_args_M = ts_autoarima(ventas_df_M, 'M')
+ventas_args_M = ts_autoarima(ventas_df_M, 'M', m=3)
 
 ## Devoluciones
 # D
 devs_df_D = time_series(df=devoluciones, date_col='FECHA', n_col='ARTS.', f0=2020, period='Y', ts_period='D')
-devs_args_D = ts_autoarima(devs_df_D, 'D')
+devs_args_D = ts_autoarima(devs_df_D, 'D', m=7)
 # W
 devs_df_W = time_series(df=devoluciones ,date_col='FECHA', n_col='ARTS.', f0=2020, period='Y', ts_period='W')
-devs_args_W = ts_autoarima(devs_df_W, 'W')
+devs_args_W = ts_autoarima(devs_df_W, 'W', m=4)
 # M
 devs_df_M = time_series(df=devoluciones, date_col='FECHA', n_col='ARTS.', f0=2020, period='Y', ts_period='M')
-devs_args_M = ts_autoarima(devs_df_M, 'M')
+devs_args_M = ts_autoarima(devs_df_M, 'M', m=1)
 
 ## Negados
 # D
 negs_df_D = time_series(df=negados, date_col='FECHA', n_col='ARTS', f0=2020, period='Y', ts_period='D')
-negs_args_D = ts_autoarima(negs_df_D, 'D')
+negs_args_D = ts_autoarima(negs_df_D, 'D', m=7)
 # W
 negs_df_W = time_series(df=negados, date_col='FECHA', n_col='ARTS', f0=2020, period='Y', ts_period='W')
-negs_args_W = ts_autoarima(negs_df_W, 'W')
+negs_args_W = ts_autoarima(negs_df_W, 'W', m=4)
 # M
 negs_df_M = time_series(df=negados, date_col='FECHA', n_col='ARTS', f0=2020, period='Y', ts_period='M')
-negs_args_M = ts_autoarima(negs_df_M, 'M')
+negs_args_M = ts_autoarima(negs_df_M, 'M', m=1)
 
 
 
@@ -407,7 +407,6 @@ def revenue_bubble_plot(col):
          xaxis_range=[0-0.25*utilidad['% UTILIDAD GLOBAL'].max(), 
             utilidad['% UTILIDAD GLOBAL'].max()*1.25], 
          yaxis_range=[0-0.25*len(utilidad), len(utilidad)*1.25], 
-
          hovermode='closest', 
          hoverlabel={'font_size': 9}, 
          margin=dict(t=0, b=0, l=0, r=0),

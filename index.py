@@ -74,17 +74,32 @@ def update_timeseries(ts, period, n):
 
 
 # Snapshot; Detallado
-
-@app.callback([Output('revenue_plot', 'figure')], 
+@app.callback([Output('revenue_plot', 'figure'), 
+   Output('revenue_search', 'children')], 
       [Input('revenue_dropdown', 'value')])
 def update_revenue_bubble_plot(col):
-   return [st.revenue_bubble_plot(col)]
+   if col == 'ESTILO':
+      group = 'ARTÍCULO ESTILO'
+   elif col == 'TIENDA':
+      group = 'NOTA DE VENTA TIENDA'
+   elif col == 'ACABADO':
+      group = 'ARTÍCULO ACABADO'
+   else:
+      group = col
+
+   options = st.base.loc[:, group].dropna().unique()
+   search_bar = snapshot.revenue_search_bar(options)
+
+   fig = st.revenue_bubble_plot(col)
+   return [fig, search_bar]
 
 
 # Serie de tiempo de selección
 @app.callback([Output('ts_plot_selection', 'figure')], 
-      [Input('revenue_dropdown', 'value'), Input('revenue_plot', 'hoverData')])
-def selection_time_series(col, hover_data):
+      [Input('revenue_dropdown', 'value'), 
+         Input('revenue_plot', 'hoverData'), 
+         Input('revenue_dd_search', 'value')])
+def selection_time_series(col, hover_data, search):
    if col == 'ESTILO':
       group = 'ARTÍCULO ESTILO'
    elif col == 'TIENDA':
@@ -96,13 +111,30 @@ def selection_time_series(col, hover_data):
 
    value = hover_data['points'][0]['text']
 
-   s = st.time_series(group=group, value=value, date_col='NOTA DE VENTA FECHA', 
-         n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
-   df = s.reset_index()
-   df.rename(columns={'index': 'fecha', df.columns[1]: 'y'}, inplace=True)
+   if search != '':
+      s = st.time_series(group=group, value=search, date_col='NOTA DE VENTA FECHA', 
+            n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
 
-   return [st.time_series_plot(df, verb='Ventas', watermark=True, watermark_text1=group, watermark_text2=value)]
+      df = s.reset_index()
+      df.rename(columns={'index': 'fecha', df.columns[1]: 'y'}, inplace=True)
 
+      fig = st.time_series_plot(df, verb='Ventas', watermark=True, watermark_text1=group, watermark_text2=search)
+   else:
+      s = st.time_series(group=group, value=value, date_col='NOTA DE VENTA FECHA', 
+            n_col='ARTÍCULO SUBTOTAL', f0=2020, period='Y', ts_period='W')
+
+      df = s.reset_index()
+      df.rename(columns={'index': 'fecha', df.columns[1]: 'y'}, inplace=True)
+
+      fig = st.time_series_plot(df, verb='Ventas', watermark=True, watermark_text1=group, watermark_text2=value)
+
+   return [fig]
+
+
+@app.callback([Output('revenue_dd_search', 'value')], 
+      [Input('revenue_plot', 'hoverData')])
+def clear_search(value):
+   return ['']
 
 
 app.config.suppress_callback_exceptions = True

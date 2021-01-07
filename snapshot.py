@@ -453,10 +453,7 @@ card_revenue_bubble = dbc.Card(
             hoverData={'points': [{'text': 'Nacional'}]},
             config={'displayModeBar': False, 'responsive': True}, 
             style={
-               'paddingLeft': '5px', 
-               'paddingRight': '5px', 
-               'paddingTop': '5px', 
-               'paddingBottom': '0px'
+               'padding': '5px'
                }
             )
          ], 
@@ -469,19 +466,30 @@ card_revenue_bubble = dbc.Card(
          'paddingRight': '0px'}
       )
 
+# Dropdown search
+def revenue_search_bar(data_options):
+   options = []
+   for i in data_options:
+      options.append(dict([('label', i), ('value', i)]))
+
+   revenue_dropdown = dcc.Dropdown(id='revenue_dd_search', options=options, 
+         value='', clearable=False, style={'width': '100%'})  
+
+   return revenue_dropdown
+
 
 # Serie de tiempo de selección
 card_ts_selection = dbc.Card(
       dcc.Graph(id='ts_plot_selection', config={'displayModeBar': False, 'responsive': True}),
       style={
          'height': '100%', 
+         'width': '100%', 
          'marginRight': '5px', 
          'marginTop': '5px', 
          'paddingTop': '0px', 
          'paddingLeft': '0px', 
          'paddingRight': '0px'}
       )
-
 
 
 # Detallado
@@ -493,7 +501,12 @@ detal= html.Div(
                   revenue_dropdown, 
                   card_revenue_bubble
                   ], width=3), 
-            dbc.Col(card_ts_selection, width=9)
+            dbc.Col(
+               children=[
+                  dbc.Row(id='revenue_search'), 
+                  dbc.Row(card_ts_selection)
+               ], 
+               width=9)
             ]), 
          style={
             'marginLeft': '25px', 
